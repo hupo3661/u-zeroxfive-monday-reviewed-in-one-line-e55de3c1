@@ -7,21 +7,38 @@ Writes the funniest one-line review of my Monday to /output/entry.txt
 
 import os
 
+MIN_LENGTH = 1
+MAX_LENGTH = 200
+
 LINE = (
     "Monday reviewed itself before I did: one star, would not recommend, "
     "already booked again for next week."
 )
 
 
+def validate(text: str) -> str:
+    """Check the entry against the brief; return it unchanged if valid.
+
+    The brief requires exactly one line, 1-200 characters, non-blank.
+    """
+    if not text.strip():
+        raise ValueError("entry must not be blank or only whitespace")
+    if "\n" in text or "\r" in text:
+        raise ValueError("entry must be exactly one line")
+    if not MIN_LENGTH <= len(text) <= MAX_LENGTH:
+        raise ValueError(
+            f"entry is {len(text)} chars, must be {MIN_LENGTH}-{MAX_LENGTH}"
+        )
+    return text
+
+
 def main() -> None:
-    assert 1 <= len(LINE) <= 200, f"line is {len(LINE)} chars, must be 1-200"
-    assert LINE.strip(), "line must not be only whitespace"
-    assert "\n" not in LINE, "entry must be exactly one line"
+    entry = validate(LINE)
     out_dir = os.environ.get("OUTPUT_DIR", "/output")
     os.makedirs(out_dir, exist_ok=True)
     with open(os.path.join(out_dir, "entry.txt"), "w", encoding="utf-8") as f:
-        f.write(LINE + "\n")
-    print(LINE)
+        f.write(entry + "\n")
+    print(entry)
 
 
 if __name__ == "__main__":
